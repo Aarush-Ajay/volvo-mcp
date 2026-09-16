@@ -1,0 +1,31 @@
+[project]
+name = "volvo-mcp"
+version = "0.1.0"
+description = "MCP server and CLI chatbot for Volvo truck range, charging and refuelling queries"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic[mcp]>=1.5.0",
+    "google-genai>=2.23.0",
+    "httpx>=0.28.1",
+    "mcp[cli]>=2.2.0",
+    "python-dotenv>=1.2.3",
+    "rich>=15.0.0",
+    "truststore>=0.10.4",
+]
+
+[project.scripts]
+volvo-mcp-server = "volvo_mcp.server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
