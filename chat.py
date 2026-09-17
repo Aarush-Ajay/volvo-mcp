@@ -29,9 +29,10 @@ from google import genai
 from google.genai import types
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from rich.console import Console
+from rich.console import Console, Group
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.text import Text
 
 MODEL = "gemini-3.6-flash"
 MAX_TOOL_ROUNDS = 8
@@ -88,7 +89,28 @@ Try: [dim]"FH Electric at 40%, 38 tonnes, hilly, 2 C - how far can I get?"[/dim]
      [dim]"Can I make Gothenburg to Malmo on 55% in an FH Electric?"[/dim]\
 """
 
+# Plain ASCII on purpose: classic cmd.exe mangles emoji and many Unicode glyphs.
+# Built as Text rather than markup, because rich would read any square bracket
+# in the art as a style tag.
+TRUCK = r"""
+  _____________________________   _______
+ |                             | |  __   \
+ |                             | | |__|   \____
+ |_____________________________|_|_____________|
+    (O)  (O)                       (O)      (O)
+"""
+
 console = Console()
+
+
+def _banner() -> Group:
+    """Truck art above the welcome text, for the startup panel."""
+    *body, wheels = TRUCK.strip("\n").splitlines()
+    art = Text()
+    for line in body:
+        art.append(line + "\n", style="cyan")
+    art.append(wheels, style="bold white")
+    return Group(art, Text(), WELCOME)
 
 # The SDK advises using chats.send_message rather than models.generate_content
 # for tool calling. We cannot: that path always converts the request config to a
@@ -301,7 +323,7 @@ async def main() -> int:
     client = genai.Client()
     server = StdioServerParameters(command="uv", args=["run", "volvo-mcp-server"])
 
-    console.print(Panel(WELCOME, border_style="blue", padding=(1, 2)))
+    console.print(Panel(_banner(), border_style="blue", padding=(1, 2)))
 
     async with stdio_client(server) as (read, write):
         async with ClientSession(read, write) as session:
